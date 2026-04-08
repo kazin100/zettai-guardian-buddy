@@ -128,9 +128,9 @@ const ChatBot = () => {
                       : "bg-secondary text-secondary-foreground"
                   }`}
                 >
-                  <ReactMarkdown className="prose prose-invert prose-sm max-w-none [&>p]:m-0">
-                    {msg.content}
-                  </ReactMarkdown>
+                  <div className="prose prose-invert prose-sm max-w-none [&>p]:m-0">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
                 </div>
               </div>
             ))}
