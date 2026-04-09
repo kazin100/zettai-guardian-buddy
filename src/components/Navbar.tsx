@@ -11,6 +11,10 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/scanner", label: "Scanner" },
     { to: "/dashboard", label: "Dashboard" },
+    { to: "/benefits", label: "Benefícios" },
+    { to: "/security-center", label: "Central" },
+    { to: "/contact", label: "Contato" },
+    { to: "/about", label: "Sobre" },
   ];
 
   return (

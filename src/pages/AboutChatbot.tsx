@@ -33,7 +33,7 @@ const AboutChatbot = () => (
 
       <section className="card-cyber p-6 space-y-3">
         <div className="flex items-center gap-2">
-          <AlertCircle className="h-6 w-6 text-yellow-500" />
+          <AlertCircle className="h-6 w-6 text-destructive" />
           <h2 className="text-xl font-bold text-foreground">Limitações</h2>
         </div>
         <ul className="text-muted-foreground text-sm space-y-2 list-disc list-inside">
