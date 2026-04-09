@@ -1,8 +1,10 @@
+import { useEffect, useState } from "react";
 import { BarChart3, Users, ScanSearch, Bot, ShieldAlert, MapPin } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
+import { supabase } from "@/integrations/supabase/client";
 
 const monthlyData = [
   { month: "Fev", acessos: 320, scans: 45, chats: 120 },
@@ -21,7 +23,7 @@ const vulnData = [
 
 const COLORS = ["hsl(160,100%,45%)", "hsl(200,100%,50%)", "hsl(40,100%,50%)", "hsl(0,80%,55%)"];
 
-const regionData = [
+const fallbackRegionData = [
   { region: "SP", users: 480 },
   { region: "RJ", users: 320 },
   { region: "MG", users: 190 },
@@ -38,6 +40,30 @@ const stats = [
 ];
 
 const Dashboard = () => {
+  const [regionData, setRegionData] = useState(fallbackRegionData);
+
+  useEffect(() => {
+    const fetchGeo = async () => {
+      const { data } = await supabase
+        .from("geolocations")
+        .select("state")
+        .not("state", "is", null);
+      if (data && data.length > 0) {
+        const counts: Record<string, number> = {};
+        data.forEach((row) => {
+          const abbr = row.state || "Outro";
+          counts[abbr] = (counts[abbr] || 0) + 1;
+        });
+        const sorted = Object.entries(counts)
+          .map(([region, users]) => ({ region, users }))
+          .sort((a, b) => b.users - a.users)
+          .slice(0, 8);
+        if (sorted.length > 0) setRegionData(sorted);
+      }
+    };
+    fetchGeo();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
