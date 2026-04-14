@@ -6,11 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 const Settings = () => {
   const { toast } = useToast();
-  const [name, setName] = useState("Usuário Demo");
-  const [email, setEmail] = useState("demo@zettai.com");
+  const { user } = useAuth();
+  const [name, setName] = useState("Usuário");
+  const [email] = useState(user?.email ?? "");
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [geolocation, setGeolocation] = useState(false);
@@ -36,7 +38,7 @@ const Settings = () => {
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+                <Input id="email" type="email" value={email} readOnly className="mt-1 opacity-70" />
               </div>
             </div>
           </section>
