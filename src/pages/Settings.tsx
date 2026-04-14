@@ -38,7 +38,7 @@ const Settings = () => {
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
+                <Input id="email" type="email" value={email} readOnly className="mt-1 opacity-70" />
               </div>
             </div>
           </section>
