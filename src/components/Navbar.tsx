@@ -1,11 +1,20 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Shield, Menu, X } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Shield, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   const links = [
     { to: "/", label: "Home" },
@@ -16,6 +25,11 @@ const Navbar = () => {
     { to: "/contact", label: "Contato" },
     { to: "/about", label: "Sobre" },
   ];
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
@@ -38,9 +52,29 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <Link to="/login">
-            <Button variant="cyber" size="sm">Login</Button>
-          </Link>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="cyber-outline" size="sm" className="gap-2 max-w-[180px]">
+                  <User className="h-4 w-4 shrink-0" />
+                  <span className="truncate text-xs">{user.email}</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-card border-border">
+                <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
+                  Configurações
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
+                  <LogOut className="h-4 w-4 mr-2" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link to="/login">
+              <Button variant="cyber" size="sm">Login</Button>
+            </Link>
+          )}
         </div>
 
         {/* Mobile */}
@@ -63,9 +97,18 @@ const Navbar = () => {
               {link.label}
             </Link>
           ))}
-          <Link to="/login" onClick={() => setIsOpen(false)}>
-            <Button variant="cyber" size="sm" className="w-full">Login</Button>
-          </Link>
+          {user ? (
+            <>
+              <p className="text-xs text-primary truncate py-2">{user.email}</p>
+              <Button variant="cyber-outline" size="sm" className="w-full" onClick={() => { setIsOpen(false); handleLogout(); }}>
+                <LogOut className="h-4 w-4 mr-2" /> Sair
+              </Button>
+            </>
+          ) : (
+            <Link to="/login" onClick={() => setIsOpen(false)}>
+              <Button variant="cyber" size="sm" className="w-full">Login</Button>
+            </Link>
+          )}
         </div>
       )}
     </nav>
