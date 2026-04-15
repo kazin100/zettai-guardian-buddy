@@ -155,7 +155,15 @@ const Login = () => {
           </Button>
         </form>
 
-        <p className="text-center text-sm text-muted-foreground mt-6">
+        {!isSignUp && (
+          <div className="text-center mt-4">
+            <Link to="/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              Esqueci minha senha
+            </Link>
+          </div>
+        )}
+
+        <p className="text-center text-sm text-muted-foreground mt-4">
           {isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"}{" "}
           <button onClick={() => { setIsSignUp(!isSignUp); setError(""); }} className="text-primary hover:underline font-medium">
             {isSignUp ? "Entrar" : "Criar conta"}
