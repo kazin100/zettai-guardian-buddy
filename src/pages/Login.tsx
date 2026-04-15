@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Shield, Mail, Lock, Loader2, Home } from "lucide-react";
+import { Shield, Mail, Lock, Loader2, Home, Eye, EyeOff, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,13 +10,26 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isEmailValid = email.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isPasswordValid = password.length >= 6;
+  const emailTouched = email.length > 0;
+  const passwordTouched = password.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
     setLoading(true);
+    setError("");
 
     try {
       if (isSignUp) {
@@ -32,18 +45,30 @@ const Login = () => {
         if (error) throw error;
         navigate("/dashboard");
       }
-    } catch (error: any) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } catch (err: any) {
+      setError("Email ou senha inválidos");
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
   };
 
+  const inputBorder = (touched: boolean, valid: boolean) =>
+    !touched
+      ? "border-border"
+      : valid
+        ? "border-emerald-500/60"
+        : "border-destructive/50";
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(var(--primary)/0.05)_0%,transparent_70%)]" />
 
-      <div className="card-cyber p-8 w-full max-w-md border-glow relative z-10">
+      <div
+        className={`card-cyber p-8 w-full max-w-md border-glow relative z-10 transition-all duration-700 ${
+          mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+        }`}
+      >
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 mb-4">
             <Shield className="h-8 w-8 text-primary" />
@@ -57,6 +82,13 @@ const Login = () => {
           </p>
         </div>
 
+        {error && (
+          <div className="mb-4 flex items-center gap-2 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-4 py-3">
+            <XCircle className="h-4 w-4 shrink-0" />
+            <span>❌ {error}</span>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="text-sm text-muted-foreground mb-1 block">Email</label>
@@ -65,11 +97,20 @@ const Login = () => {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setError(""); }}
                 placeholder="seu@email.com"
                 required
-                className="w-full bg-input border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                className={`w-full bg-input border rounded-lg pl-10 pr-10 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors ${inputBorder(emailTouched, isEmailValid)}`}
               />
+              {emailTouched && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                  {isEmailValid ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive/60" />
+                  )}
+                </span>
+              )}
             </div>
           </div>
 
@@ -78,15 +119,35 @@ const Login = () => {
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setError(""); }}
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="w-full bg-input border border-border rounded-lg pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                className={`w-full bg-input border rounded-lg pl-10 pr-20 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors ${inputBorder(passwordTouched, isPasswordValid)}`}
               />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                {passwordTouched && (
+                  isPasswordValid ? (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive/60" />
+                  )
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
+            {passwordTouched && !isPasswordValid && (
+              <p className="text-xs text-muted-foreground mt-1">Mínimo 6 caracteres</p>
+            )}
           </div>
 
           <Button variant="cyber" className="w-full" type="submit" disabled={loading}>
@@ -96,7 +157,7 @@ const Login = () => {
 
         <p className="text-center text-sm text-muted-foreground mt-6">
           {isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"}{" "}
-          <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary hover:underline font-medium">
+          <button onClick={() => { setIsSignUp(!isSignUp); setError(""); }} className="text-primary hover:underline font-medium">
             {isSignUp ? "Entrar" : "Criar conta"}
           </button>
         </p>
