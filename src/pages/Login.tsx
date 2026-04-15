@@ -100,6 +100,14 @@ const Login = () => {
             {isSignUp ? "Entrar" : "Criar conta"}
           </button>
         </p>
+
+        <div className="text-center mt-4">
+          <Link to="/">
+            <Button variant="cyber-outline" size="sm" className="gap-2">
+              <Home className="h-4 w-4" /> Voltar para Home
+            </Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
