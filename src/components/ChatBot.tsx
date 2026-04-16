@@ -112,12 +112,8 @@ const ChatBot = () => {
     }
   };
 
-  const handleUpgrade = async () => {
-    await upgradeToPremium();
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: "🎉 **Parabéns!** Você agora é um usuário **Premium**! Aproveite o chatbot ilimitado." },
-    ]);
+  const handleUpgrade = () => {
+    window.location.href = "/assinatura";
   };
 
   return (

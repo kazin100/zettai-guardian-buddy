@@ -22,6 +22,7 @@ const Navbar = () => {
     { to: "/dashboard", label: "Dashboard" },
     { to: "/benefits", label: "Benefícios" },
     { to: "/security-center", label: "Central" },
+    { to: "/assinatura", label: "Planos" },
     { to: "/contact", label: "Contato" },
     { to: "/about", label: "Sobre" },
   ];
