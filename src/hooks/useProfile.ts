@@ -6,7 +6,9 @@ export interface Profile {
   id: string;
   email: string | null;
   tipo_usuario: string;
+  status_pagamento: string;
   mensagens_restantes: number;
+  analises_restantes: number;
   ultima_interacao: string | null;
 }
 
@@ -29,14 +31,15 @@ export const useProfile = () => {
       .single();
 
     if (!error && data) {
-      // Daily reset: if ultima_interacao is not today, reset counter
       const today = new Date().toISOString().slice(0, 10);
-      if (data.ultima_interacao !== today && data.tipo_usuario !== "premium") {
+      const isPremium = data.tipo_usuario === "premium" && data.status_pagamento === "ativo";
+
+      if (data.ultima_interacao !== today && !isPremium) {
         await supabase
           .from("profiles")
-          .update({ mensagens_restantes: 3, ultima_interacao: today })
+          .update({ mensagens_restantes: 3, analises_restantes: 1, ultima_interacao: today })
           .eq("id", user.id);
-        setProfile({ ...data, mensagens_restantes: 3, ultima_interacao: today });
+        setProfile({ ...data, mensagens_restantes: 3, analises_restantes: 1, ultima_interacao: today } as Profile);
       } else {
         setProfile(data as Profile);
       }
@@ -59,14 +62,27 @@ export const useProfile = () => {
     setProfile((p) => p ? { ...p, mensagens_restantes: newCount, ultima_interacao: today } : null);
   };
 
+  const decrementScans = async () => {
+    if (!user || !profile) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const newCount = Math.max(0, profile.analises_restantes - 1);
+    await supabase
+      .from("profiles")
+      .update({ analises_restantes: newCount, ultima_interacao: today })
+      .eq("id", user.id);
+    setProfile((p) => p ? { ...p, analises_restantes: newCount, ultima_interacao: today } : null);
+  };
+
   const upgradeToPremium = async () => {
     if (!user) return;
     await supabase
       .from("profiles")
-      .update({ tipo_usuario: "premium" })
+      .update({ tipo_usuario: "premium", status_pagamento: "ativo" })
       .eq("id", user.id);
-    setProfile((p) => p ? { ...p, tipo_usuario: "premium" } : null);
+    setProfile((p) => p ? { ...p, tipo_usuario: "premium", status_pagamento: "ativo" } : null);
   };
 
-  return { profile, loading, decrementMessages, upgradeToPremium, refetch: fetchProfile };
+  const isPremium = profile?.tipo_usuario === "premium" && profile?.status_pagamento === "ativo";
+
+  return { profile, loading, isPremium, decrementMessages, decrementScans, upgradeToPremium, refetch: fetchProfile };
 };
