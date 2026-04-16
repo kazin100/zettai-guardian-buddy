@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
-import { BarChart3, Users, ScanSearch, Bot, ShieldAlert, MapPin } from "lucide-react";
+import { BarChart3, Users, ScanSearch, Bot, ShieldAlert, MapPin, Lock, Crown } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { Button } from "@/components/ui/button";
+import { useProfile } from "@/hooks/useProfile";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ChatBot from "@/components/ChatBot";
@@ -41,8 +44,10 @@ const stats = [
 
 const Dashboard = () => {
   const [regionData, setRegionData] = useState(fallbackRegionData);
+  const { isPremium, loading } = useProfile();
 
   useEffect(() => {
+    if (!isPremium) return;
     const fetchGeo = async () => {
       const { data } = await supabase
         .from("geolocations")
@@ -62,7 +67,49 @@ const Dashboard = () => {
       }
     };
     fetchGeo();
-  }, []);
+  }, [isPremium]);
+
+  if (loading) return (
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      <main className="pt-24 pb-16 flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </main>
+      <Footer />
+    </div>
+  );
+
+  // Premium gate
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 pb-16">
+          <div className="container mx-auto px-4 max-w-lg text-center space-y-6">
+            <div className="card-cyber p-10 border-glow space-y-6">
+              <Lock className="h-12 w-12 text-primary mx-auto" />
+              <h1 className="text-2xl font-bold">Dashboard Analítico</h1>
+              <p className="text-muted-foreground text-sm">
+                🔒 Esta funcionalidade é exclusiva para usuários premium.<br />
+                Assine o plano para desbloquear todos os recursos.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link to="/">
+                  <Button variant="cyber-outline">Voltar para Home</Button>
+                </Link>
+                <Link to="/assinatura">
+                  <Button variant="cyber" className="gap-2">
+                    <Crown className="h-4 w-4" /> Assinar Plano
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -76,7 +123,6 @@ const Dashboard = () => {
             <p className="text-muted-foreground text-sm">Dados de Fevereiro a Junho de 2026</p>
           </div>
 
-          {/* Stats */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             {stats.map((stat) => (
               <div key={stat.label} className="card-cyber p-5">
@@ -88,17 +134,13 @@ const Dashboard = () => {
                 <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-xs text-muted-foreground">{stat.label}</span>
-                  <span className={`text-xs font-medium ${stat.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>
-                    {stat.change}
-                  </span>
+                  <span className={`text-xs font-medium ${stat.change.startsWith("+") ? "text-primary" : "text-destructive"}`}>{stat.change}</span>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {/* Area chart */}
             <div className="card-cyber p-6">
               <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
                 <BarChart3 className="h-4 w-4 text-primary" /> Crescimento Mensal
@@ -120,7 +162,6 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Pie chart */}
             <div className="card-cyber p-6">
               <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
                 <ShieldAlert className="h-4 w-4 text-primary" /> Vulnerabilidades por Tipo
@@ -128,9 +169,7 @@ const Dashboard = () => {
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie data={vulnData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-                    {vulnData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                    ))}
+                    {vulnData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                   </Pie>
                   <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
                 </PieChart>
@@ -139,7 +178,6 @@ const Dashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Bar chart - Chatbot vs Scans */}
             <div className="card-cyber p-6">
               <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
                 <Bot className="h-4 w-4 text-primary" /> Chatbot vs Scanner (mensal)
@@ -156,7 +194,6 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            {/* Region chart */}
             <div className="card-cyber p-6">
               <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" /> Usuários por Região
