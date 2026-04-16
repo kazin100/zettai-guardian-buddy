@@ -18,13 +18,12 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const { profile, decrementMessages, upgradeToPremium } = useProfile();
+  const { profile, isPremium, decrementMessages, upgradeToPremium } = useProfile();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const isPremium = profile?.tipo_usuario === "premium";
   const canSendMessage = isPremium || (profile?.mensagens_restantes ?? 0) > 0;
 
   const sendMessage = async () => {
@@ -113,12 +112,8 @@ const ChatBot = () => {
     }
   };
 
-  const handleUpgrade = async () => {
-    await upgradeToPremium();
-    setMessages((prev) => [
-      ...prev,
-      { role: "assistant", content: "🎉 **Parabéns!** Você agora é um usuário **Premium**! Aproveite o chatbot ilimitado." },
-    ]);
+  const handleUpgrade = () => {
+    window.location.href = "/assinatura";
   };
 
   return (

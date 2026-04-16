@@ -17,6 +17,7 @@ import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import AboutChatbot from "./pages/AboutChatbot";
+import Assinatura from "./pages/Assinatura";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/privacy" element={<Privacy />} />
           <Route path="/about-chatbot" element={<AboutChatbot />} />
+          <Route path="/assinatura" element={<Assinatura />} />
           {/* Protected routes */}
           <Route path="/scanner" element={<ProtectedRoute><Scanner /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />

@@ -49,26 +49,32 @@ export type Database = {
       }
       profiles: {
         Row: {
+          analises_restantes: number
           created_at: string
           email: string | null
           id: string
           mensagens_restantes: number
+          status_pagamento: string
           tipo_usuario: string
           ultima_interacao: string | null
         }
         Insert: {
+          analises_restantes?: number
           created_at?: string
           email?: string | null
           id: string
           mensagens_restantes?: number
+          status_pagamento?: string
           tipo_usuario?: string
           ultima_interacao?: string | null
         }
         Update: {
+          analises_restantes?: number
           created_at?: string
           email?: string | null
           id?: string
           mensagens_restantes?: number
+          status_pagamento?: string
           tipo_usuario?: string
           ultima_interacao?: string | null
         }
