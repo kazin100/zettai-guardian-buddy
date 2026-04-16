@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, Send, X, MessageSquare } from "lucide-react";
+import { Bot, Send, X, MessageSquare, Crown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 import ReactMarkdown from "react-markdown";
 
 type Message = { role: "user" | "assistant"; content: string };
@@ -16,18 +17,35 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
+  const { profile, decrementMessages, upgradeToPremium } = useProfile();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const isPremium = profile?.tipo_usuario === "premium";
+  const canSendMessage = isPremium || (profile?.mensagens_restantes ?? 0) > 0;
+
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
+
+    if (!user) {
+      setMessages((prev) => [...prev, { role: "assistant", content: "⚠️ Você precisa estar **logado** para usar o chatbot." }]);
+      return;
+    }
+
+    if (!canSendMessage) return;
 
     const userMsg: Message = { role: "user", content: input.trim() };
     setMessages((prev) => [...prev, userMsg]);
     setInput("");
     setIsLoading(true);
+
+    // Decrement for non-premium users
+    if (!isPremium) {
+      await decrementMessages();
+    }
 
     let assistantSoFar = "";
 
@@ -95,6 +113,14 @@ const ChatBot = () => {
     }
   };
 
+  const handleUpgrade = async () => {
+    await upgradeToPremium();
+    setMessages((prev) => [
+      ...prev,
+      { role: "assistant", content: "🎉 **Parabéns!** Você agora é um usuário **Premium**! Aproveite o chatbot ilimitado." },
+    ]);
+  };
+
   return (
     <>
       {/* Floating button */}
@@ -111,10 +137,19 @@ const ChatBot = () => {
           {/* Header */}
           <div className="flex items-center gap-3 p-4 border-b border-border bg-gradient-cyber">
             <Bot className="h-6 w-6 text-primary-foreground" />
-            <div>
+            <div className="flex-1">
               <h3 className="font-semibold text-primary-foreground text-sm">Zettai AI</h3>
               <p className="text-xs text-primary-foreground/70">Especialista em segurança</p>
             </div>
+            {user && profile && (
+              <span className="text-xs text-primary-foreground/80 flex items-center gap-1">
+                {isPremium ? (
+                  <><Crown className="h-3 w-3" /> Premium</>
+                ) : (
+                  <>{profile.mensagens_restantes}/3</>
+                )}
+              </span>
+            )}
           </div>
 
           {/* Messages */}
@@ -144,6 +179,19 @@ const ChatBot = () => {
             <div ref={messagesEndRef} />
           </div>
 
+          {/* Limit reached banner */}
+          {user && !canSendMessage && !isPremium && (
+            <div className="px-4 py-3 border-t border-border bg-card/80 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Lock className="h-4 w-4 text-primary" />
+                <span>Limite diário atingido (3/3 mensagens)</span>
+              </div>
+              <Button variant="cyber" size="sm" className="w-full gap-2" onClick={handleUpgrade}>
+                <Crown className="h-4 w-4" /> Tornar-se Premium
+              </Button>
+            </div>
+          )}
+
           {/* Input */}
           <div className="p-3 border-t border-border">
             <div className="flex gap-2">
@@ -151,10 +199,11 @@ const ChatBot = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                placeholder="Pergunte sobre segurança..."
-                className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
+                placeholder={canSendMessage ? "Pergunte sobre segurança..." : "Limite diário atingido"}
+                disabled={!canSendMessage && !!user}
+                className="flex-1 bg-input border border-border rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 disabled:opacity-50"
               />
-              <Button variant="cyber" size="icon" onClick={sendMessage} disabled={isLoading}>
+              <Button variant="cyber" size="icon" onClick={sendMessage} disabled={isLoading || (!canSendMessage && !!user)}>
                 <Send className="h-4 w-4" />
               </Button>
             </div>
