@@ -22,9 +22,10 @@ const Scanner = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
-  const { profile, isPremium, decrementScans } = useProfile();
+  const { profile, isPremium, plan, planLimits, decrementScans } = useProfile();
 
   const canScan = isPremium || (profile?.analises_restantes ?? 0) > 0;
+  const dailyLimit = planLimits.scansPerDay === Infinity ? "∞" : planLimits.scansPerDay;
 
   const handleScan = async () => {
     if (!url.trim() || !canScan) return;
@@ -73,7 +74,8 @@ const Scanner = () => {
             </p>
             {profile && !isPremium && (
               <p className="text-xs text-muted-foreground mt-2">
-                Análises restantes hoje: <span className="text-primary font-bold">{profile.analises_restantes}/1</span>
+                Plano <span className="text-primary font-bold capitalize">{plan}</span> · Análises restantes hoje:{" "}
+                <span className="text-primary font-bold">{profile.analises_restantes}/{dailyLimit}</span>
               </p>
             )}
           </div>
@@ -83,11 +85,11 @@ const Scanner = () => {
             <div className="card-cyber p-6 border-glow mb-8 text-center space-y-4">
               <Lock className="h-8 w-8 text-primary mx-auto" />
               <p className="text-sm text-muted-foreground">
-                🔒 Você atingiu o limite gratuito de análises diárias.
+                🔒 Você atingiu o limite do seu plano. Faça upgrade para continuar.
               </p>
               <Link to="/assinatura">
                 <Button variant="cyber" className="gap-2">
-                  <Crown className="h-4 w-4" /> Assinar Plano Premium
+                  <Crown className="h-4 w-4" /> Ver Planos
                 </Button>
               </Link>
             </div>

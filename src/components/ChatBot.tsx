@@ -18,7 +18,8 @@ const ChatBot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
-  const { profile, isPremium, decrementMessages, upgradeToPremium } = useProfile();
+  const { profile, isPremium, plan, planLimits, decrementMessages } = useProfile();
+  const dailyLimit = planLimits.messagesPerDay === Infinity ? "∞" : planLimits.messagesPerDay;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -141,7 +142,7 @@ const ChatBot = () => {
                 {isPremium ? (
                   <><Crown className="h-3 w-3" /> Premium</>
                 ) : (
-                  <>{profile.mensagens_restantes}/3</>
+                  <>{profile.mensagens_restantes}/{dailyLimit} · {plan}</>
                 )}
               </span>
             )}
@@ -179,10 +180,10 @@ const ChatBot = () => {
             <div className="px-4 py-3 border-t border-border bg-card/80 space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Lock className="h-4 w-4 text-primary" />
-                <span>Limite diário atingido (3/3 mensagens)</span>
+                <span>🔒 Limite do plano {plan} atingido ({dailyLimit} mensagens)</span>
               </div>
               <Button variant="cyber" size="sm" className="w-full gap-2" onClick={handleUpgrade}>
-                <Crown className="h-4 w-4" /> Tornar-se Premium
+                <Crown className="h-4 w-4" /> Fazer Upgrade
               </Button>
             </div>
           )}

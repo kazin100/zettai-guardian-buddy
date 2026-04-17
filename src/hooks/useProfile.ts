@@ -2,10 +2,25 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
+export type PlanTier = "gratuito" | "basico" | "premium";
+
+export interface PlanLimits {
+  messagesPerDay: number; // Infinity = unlimited
+  scansPerDay: number;
+  dashboardAccess: "none" | "partial" | "full";
+}
+
+export const PLAN_CONFIG: Record<PlanTier, PlanLimits & { label: string; price: string }> = {
+  gratuito: { messagesPerDay: 3, scansPerDay: 1, dashboardAccess: "none", label: "Gratuito", price: "R$ 0,00" },
+  basico:   { messagesPerDay: 20, scansPerDay: 5, dashboardAccess: "partial", label: "Básico", price: "R$ 14,99" },
+  premium:  { messagesPerDay: Infinity, scansPerDay: Infinity, dashboardAccess: "full", label: "Premium", price: "R$ 39,99" },
+};
+
 export interface Profile {
   id: string;
   email: string | null;
   tipo_usuario: string;
+  tipo_plano: PlanTier;
   status_pagamento: string;
   mensagens_restantes: number;
   analises_restantes: number;
@@ -32,16 +47,20 @@ export const useProfile = () => {
 
     if (!error && data) {
       const today = new Date().toISOString().slice(0, 10);
-      const isPremium = data.tipo_usuario === "premium" && data.status_pagamento === "ativo";
+      const plan = (data.tipo_plano as PlanTier) ?? "gratuito";
+      const limits = PLAN_CONFIG[plan];
 
-      if (data.ultima_interacao !== today && !isPremium) {
+      // Daily reset based on plan limits (skip when unlimited)
+      if (data.ultima_interacao !== today && plan !== "premium") {
+        const resetMsgs = limits.messagesPerDay === Infinity ? data.mensagens_restantes : limits.messagesPerDay;
+        const resetScans = limits.scansPerDay === Infinity ? data.analises_restantes : limits.scansPerDay;
         await supabase
           .from("profiles")
-          .update({ mensagens_restantes: 3, analises_restantes: 1, ultima_interacao: today })
+          .update({ mensagens_restantes: resetMsgs, analises_restantes: resetScans, ultima_interacao: today })
           .eq("id", user.id);
-        setProfile({ ...data, mensagens_restantes: 3, analises_restantes: 1, ultima_interacao: today } as Profile);
+        setProfile({ ...data, mensagens_restantes: resetMsgs, analises_restantes: resetScans, ultima_interacao: today, tipo_plano: plan } as Profile);
       } else {
-        setProfile(data as Profile);
+        setProfile({ ...data, tipo_plano: plan } as Profile);
       }
     }
     setLoading(false);
@@ -53,6 +72,7 @@ export const useProfile = () => {
 
   const decrementMessages = async () => {
     if (!user || !profile) return;
+    if (profile.tipo_plano === "premium") return;
     const today = new Date().toISOString().slice(0, 10);
     const newCount = Math.max(0, profile.mensagens_restantes - 1);
     await supabase
@@ -64,6 +84,7 @@ export const useProfile = () => {
 
   const decrementScans = async () => {
     if (!user || !profile) return;
+    if (profile.tipo_plano === "premium") return;
     const today = new Date().toISOString().slice(0, 10);
     const newCount = Math.max(0, profile.analises_restantes - 1);
     await supabase
@@ -73,16 +94,53 @@ export const useProfile = () => {
     setProfile((p) => p ? { ...p, analises_restantes: newCount, ultima_interacao: today } : null);
   };
 
-  const upgradeToPremium = async () => {
+  const subscribeToPlan = async (plan: "basico" | "premium") => {
     if (!user) return;
+    const limits = PLAN_CONFIG[plan];
+    const tipo_usuario = plan === "premium" ? "premium" : "comum";
     await supabase
       .from("profiles")
-      .update({ tipo_usuario: "premium", status_pagamento: "ativo" })
+      .update({
+        tipo_plano: plan,
+        tipo_usuario,
+        status_pagamento: "ativo",
+        mensagens_restantes: limits.messagesPerDay === Infinity ? 9999 : limits.messagesPerDay,
+        analises_restantes: limits.scansPerDay === Infinity ? 9999 : limits.scansPerDay,
+      })
       .eq("id", user.id);
-    setProfile((p) => p ? { ...p, tipo_usuario: "premium", status_pagamento: "ativo" } : null);
+    setProfile((p) => p ? {
+      ...p,
+      tipo_plano: plan,
+      tipo_usuario,
+      status_pagamento: "ativo",
+      mensagens_restantes: limits.messagesPerDay === Infinity ? 9999 : limits.messagesPerDay,
+      analises_restantes: limits.scansPerDay === Infinity ? 9999 : limits.scansPerDay,
+    } : null);
   };
 
-  const isPremium = profile?.tipo_usuario === "premium" && profile?.status_pagamento === "ativo";
+  // Backwards compat with previous API
+  const upgradeToPremium = () => subscribeToPlan("premium");
 
-  return { profile, loading, isPremium, decrementMessages, decrementScans, upgradeToPremium, refetch: fetchProfile };
+  const plan: PlanTier = profile?.tipo_plano ?? "gratuito";
+  const planLimits = PLAN_CONFIG[plan];
+  const isPremium = plan === "premium" && profile?.status_pagamento === "ativo";
+  const isBasico = plan === "basico" && profile?.status_pagamento === "ativo";
+  const hasDashboardAccess = planLimits.dashboardAccess !== "none";
+  const hasFullDashboard = planLimits.dashboardAccess === "full";
+
+  return {
+    profile,
+    loading,
+    plan,
+    planLimits,
+    isPremium,
+    isBasico,
+    hasDashboardAccess,
+    hasFullDashboard,
+    decrementMessages,
+    decrementScans,
+    subscribeToPlan,
+    upgradeToPremium,
+    refetch: fetchProfile,
+  };
 };

@@ -55,6 +55,7 @@ export type Database = {
           id: string
           mensagens_restantes: number
           status_pagamento: string
+          tipo_plano: string
           tipo_usuario: string
           ultima_interacao: string | null
         }
@@ -65,6 +66,7 @@ export type Database = {
           id: string
           mensagens_restantes?: number
           status_pagamento?: string
+          tipo_plano?: string
           tipo_usuario?: string
           ultima_interacao?: string | null
         }
@@ -75,6 +77,7 @@ export type Database = {
           id?: string
           mensagens_restantes?: number
           status_pagamento?: string
+          tipo_plano?: string
           tipo_usuario?: string
           ultima_interacao?: string | null
         }
