@@ -44,10 +44,10 @@ const stats = [
 
 const Dashboard = () => {
   const [regionData, setRegionData] = useState(fallbackRegionData);
-  const { isPremium, loading } = useProfile();
+  const { isPremium, hasDashboardAccess, hasFullDashboard, plan, loading } = useProfile();
 
   useEffect(() => {
-    if (!isPremium) return;
+    if (!hasFullDashboard) return;
     const fetchGeo = async () => {
       const { data } = await supabase
         .from("geolocations")
@@ -67,7 +67,7 @@ const Dashboard = () => {
       }
     };
     fetchGeo();
-  }, [isPremium]);
+  }, [hasFullDashboard]);
 
   if (loading) return (
     <div className="min-h-screen bg-background">
@@ -79,8 +79,8 @@ const Dashboard = () => {
     </div>
   );
 
-  // Premium gate
-  if (!isPremium) {
+  // Free plan gate
+  if (!hasDashboardAccess) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -90,8 +90,9 @@ const Dashboard = () => {
               <Lock className="h-12 w-12 text-primary mx-auto" />
               <h1 className="text-2xl font-bold">Dashboard Analítico</h1>
               <p className="text-muted-foreground text-sm">
-                🔒 Esta funcionalidade é exclusiva para usuários premium.<br />
-                Assine o plano para desbloquear todos os recursos.
+                🔒 O Dashboard está disponível nos planos <span className="text-primary font-bold">Básico</span> e{" "}
+                <span className="text-primary font-bold">Premium</span>.<br />
+                Faça upgrade para desbloquear métricas e relatórios.
               </p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Link to="/">
@@ -99,7 +100,7 @@ const Dashboard = () => {
                 </Link>
                 <Link to="/assinatura">
                   <Button variant="cyber" className="gap-2">
-                    <Crown className="h-4 w-4" /> Assinar Plano
+                    <Crown className="h-4 w-4" /> Ver Planos
                   </Button>
                 </Link>
               </div>
