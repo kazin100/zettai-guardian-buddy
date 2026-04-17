@@ -117,11 +117,16 @@ const Dashboard = () => {
       <Navbar />
       <main className="pt-24 pb-16">
         <div className="container mx-auto px-4">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">
-              <span className="text-gradient-cyber">Dashboard</span> Analítico
-            </h1>
-            <p className="text-muted-foreground text-sm">Dados de Fevereiro a Junho de 2026</p>
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">
+                <span className="text-gradient-cyber">Dashboard</span> Analítico
+              </h1>
+              <p className="text-muted-foreground text-sm">Dados de Fevereiro a Junho de 2026</p>
+            </div>
+            <span className="px-3 py-1 rounded-full border border-primary/30 bg-primary/5 text-xs text-primary font-medium capitalize">
+              Plano {plan}{!hasFullDashboard && " · acesso parcial"}
+            </span>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -163,53 +168,81 @@ const Dashboard = () => {
               </ResponsiveContainer>
             </div>
 
-            <div className="card-cyber p-6">
-              <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
-                <ShieldAlert className="h-4 w-4 text-primary" /> Vulnerabilidades por Tipo
-              </h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie data={vulnData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
-                    {vulnData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
+            {hasFullDashboard ? (
+              <div className="card-cyber p-6">
+                <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
+                  <ShieldAlert className="h-4 w-4 text-primary" /> Vulnerabilidades por Tipo
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie data={vulnData} cx="50%" cy="50%" outerRadius={80} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false} fontSize={11}>
+                      {vulnData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="card-cyber p-6 flex flex-col items-center justify-center text-center space-y-3 min-h-[300px]">
+                <Lock className="h-8 w-8 text-primary" />
+                <h3 className="font-semibold text-sm">Gráficos avançados</h3>
+                <p className="text-xs text-muted-foreground">Disponível no plano Premium</p>
+                <Link to="/assinatura">
+                  <Button variant="cyber" size="sm" className="gap-2">
+                    <Crown className="h-4 w-4" /> Fazer Upgrade
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="card-cyber p-6">
-              <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
-                <Bot className="h-4 w-4 text-primary" /> Chatbot vs Scanner (mensal)
-              </h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,15%)" />
-                  <XAxis dataKey="month" stroke="hsl(220,10%,40%)" fontSize={12} />
-                  <YAxis stroke="hsl(220,10%,40%)" fontSize={12} />
-                  <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
-                  <Bar dataKey="chats" fill="hsl(160,100%,45%)" radius={[4, 4, 0, 0]} name="Chatbot" />
-                  <Bar dataKey="scans" fill="hsl(200,100%,50%)" radius={[4, 4, 0, 0]} name="Scanner" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          {hasFullDashboard && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="card-cyber p-6">
+                <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
+                  <Bot className="h-4 w-4 text-primary" /> Chatbot vs Scanner (mensal)
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,15%)" />
+                    <XAxis dataKey="month" stroke="hsl(220,10%,40%)" fontSize={12} />
+                    <YAxis stroke="hsl(220,10%,40%)" fontSize={12} />
+                    <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
+                    <Bar dataKey="chats" fill="hsl(160,100%,45%)" radius={[4, 4, 0, 0]} name="Chatbot" />
+                    <Bar dataKey="scans" fill="hsl(200,100%,50%)" radius={[4, 4, 0, 0]} name="Scanner" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-            <div className="card-cyber p-6">
-              <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" /> Usuários por Região
-              </h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={regionData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,15%)" />
-                  <XAxis type="number" stroke="hsl(220,10%,40%)" fontSize={12} />
-                  <YAxis dataKey="region" type="category" stroke="hsl(220,10%,40%)" fontSize={12} width={30} />
-                  <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
-                  <Bar dataKey="users" fill="hsl(160,100%,45%)" radius={[0, 4, 4, 0]} name="Usuários" />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="card-cyber p-6">
+                <h3 className="font-semibold mb-4 text-sm flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-primary" /> Usuários por Região
+                </h3>
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={regionData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(220,15%,15%)" />
+                    <XAxis type="number" stroke="hsl(220,10%,40%)" fontSize={12} />
+                    <YAxis dataKey="region" type="category" stroke="hsl(220,10%,40%)" fontSize={12} width={30} />
+                    <Tooltip contentStyle={{ background: "hsl(220,18%,7%)", border: "1px solid hsl(160,30%,15%)", borderRadius: "8px", fontSize: 12 }} />
+                    <Bar dataKey="users" fill="hsl(160,100%,45%)" radius={[0, 4, 4, 0]} name="Usuários" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-          </div>
+          )}
+
+          {!hasFullDashboard && (
+            <div className="mt-6 card-cyber p-6 text-center border-glow">
+              <p className="text-sm text-muted-foreground mb-3">
+                🔓 Desbloqueie geolocalização, gráficos detalhados e relatórios completos.
+              </p>
+              <Link to="/assinatura">
+                <Button variant="cyber" className="gap-2">
+                  <Crown className="h-4 w-4" /> Conhecer o Premium
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </main>
       <Footer />
