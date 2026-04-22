@@ -52,8 +52,10 @@ export type Database = {
           analises_restantes: number
           created_at: string
           email: string | null
+          full_name: string | null
           id: string
           mensagens_restantes: number
+          phone: string | null
           status_pagamento: string
           tipo_plano: string
           tipo_usuario: string
@@ -63,8 +65,10 @@ export type Database = {
           analises_restantes?: number
           created_at?: string
           email?: string | null
+          full_name?: string | null
           id: string
           mensagens_restantes?: number
+          phone?: string | null
           status_pagamento?: string
           tipo_plano?: string
           tipo_usuario?: string
@@ -74,8 +78,10 @@ export type Database = {
           analises_restantes?: number
           created_at?: string
           email?: string | null
+          full_name?: string | null
           id?: string
           mensagens_restantes?: number
+          phone?: string | null
           status_pagamento?: string
           tipo_plano?: string
           tipo_usuario?: string
