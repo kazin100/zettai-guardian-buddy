@@ -34,9 +34,9 @@ const benefits = [
 ];
 
 const Benefits = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen bg-background flex flex-col">
     <Navbar />
-    <main className="container mx-auto px-4 pt-24 pb-16">
+    <main className="container mx-auto px-4 pt-24 pb-16 flex-1 w-full">
       <h1 className="text-3xl md:text-4xl font-bold text-gradient-cyber text-center mb-4">Ver Benefícios</h1>
       <p className="text-muted-foreground text-center max-w-2xl mx-auto mb-12">
         Descubra por que investir em segurança digital é essencial para o sucesso do seu e-commerce.

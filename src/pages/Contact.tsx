@@ -38,9 +38,9 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-16 max-w-lg">
+      <main className="container mx-auto px-4 pt-24 pb-16 max-w-lg flex-1 w-full">
         <h1 className="text-3xl font-bold text-gradient-cyber text-center mb-8">Contato</h1>
         <form onSubmit={handleSubmit} className="card-cyber p-6 space-y-4">
           <div>

@@ -86,9 +86,9 @@ const Assinatura = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16 flex-1">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 mb-6">
