@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,13 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useProfile } from "@/hooks/useProfile";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const [name, setName] = useState("Usuário");
-  const [email] = useState(user?.email ?? "");
+  const { profile } = useProfile();
+  const [name] = useState(profile?.full_name ?? "Usuário");
+  const [email] = useState(profile?.email ?? "");
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
   const [geolocation, setGeolocation] = useState(false);
@@ -34,13 +35,16 @@ const Settings = () => {
             <div className="space-y-3">
               <div>
                 <Label htmlFor="name">Nome</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
+                <Input id="name" value={name} readOnly className="mt-1 opacity-70" />
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" type="email" value={email} readOnly className="mt-1 opacity-70" />
               </div>
             </div>
+            <Link to="/cadastro-usuario">
+              <Button variant="cyber-outline" className="w-full">Editar cadastro do usuário</Button>
+            </Link>
           </section>
 
           {/* Preferences */}
