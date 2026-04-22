@@ -35,11 +35,11 @@ const checklist = [
 ];
 
 const SecurityCenter = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen bg-background flex flex-col">
     <Navbar />
-    <main className="container mx-auto px-4 pt-24 pb-16 space-y-16">
+    <main className="container mx-auto px-4 pt-24 pb-16 space-y-16 flex-1 w-full">
       <div className="text-center">
-        <h1 className="text-3xl md:text-4xl font-bold text-gradient-cyber mb-4">Central de Segurança</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-gradient-cyber mb-4">Dicas</h1>
         <p className="text-muted-foreground max-w-2xl mx-auto">
           Conteúdo educativo sobre segurança digital para proteger seu e-commerce.
         </p>
