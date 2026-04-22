@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy";
 import AboutChatbot from "./pages/AboutChatbot";
 import Assinatura from "./pages/Assinatura";
 import NotFound from "./pages/NotFound";
+import HistoricoCompras from "./pages/HistoricoCompras";
 
 const App = () => (
   <TooltipProvider>
@@ -31,6 +32,7 @@ const App = () => (
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/benefits" element={<Benefits />} />
+        <Route path="/dicas" element={<SecurityCenter />} />
         <Route path="/security-center" element={<SecurityCenter />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
@@ -41,6 +43,7 @@ const App = () => (
         <Route path="/scanner" element={<ProtectedRoute><Scanner /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/cadastro-usuario" element={<ProtectedRoute><CadastroUsuario /></ProtectedRoute>} />
+        <Route path="/historico-compras" element={<ProtectedRoute><HistoricoCompras /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
