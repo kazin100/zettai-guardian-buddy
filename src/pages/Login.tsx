@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -22,12 +23,18 @@ const Login = () => {
 
   const isEmailValid = email.length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 6;
+  const isConfirmPasswordValid = confirmPassword.length > 0 && password === confirmPassword;
   const emailTouched = email.length > 0;
   const passwordTouched = password.length > 0;
+  const confirmPasswordTouched = confirmPassword.length > 0;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) return;
+    if (isSignUp && password !== confirmPassword) {
+      setError("As senhas não coincidem");
+      return;
+    }
     setLoading(true);
     setError("");
 
@@ -39,7 +46,8 @@ const Login = () => {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast({ title: "Conta criada!", description: "Verifique seu email para confirmar." });
+         toast({ title: "Conta criada!", description: "Verifique seu email para confirmar." });
+         setConfirmPassword("");
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -150,7 +158,40 @@ const Login = () => {
             )}
           </div>
 
-          <Button variant="cyber" className="w-full" type="submit" disabled={loading}>
+          {isSignUp && (
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">Confirmar senha</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => { setConfirmPassword(e.target.value); setError(""); }}
+                  placeholder="Repita sua senha"
+                  required={isSignUp}
+                  minLength={6}
+                  className={`w-full bg-input border rounded-lg pl-10 pr-10 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50 transition-colors ${inputBorder(confirmPasswordTouched, isConfirmPasswordValid)}`}
+                />
+                {confirmPasswordTouched && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {isConfirmPasswordValid ? (
+                      <CheckCircle2 className="h-4 w-4 text-primary" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-destructive/60" />
+                    )}
+                  </span>
+                )}
+              </div>
+              {confirmPasswordTouched && !isConfirmPasswordValid && (
+                <p className="text-xs text-destructive mt-1">❌ As senhas não coincidem</p>
+              )}
+              {confirmPasswordTouched && isConfirmPasswordValid && (
+                <p className="text-xs text-primary mt-1">✅ Senhas coincidem</p>
+              )}
+            </div>
+          )}
+
+          <Button variant="cyber" className="w-full" type="submit" disabled={loading || (isSignUp && !isConfirmPasswordValid)}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isSignUp ? "Criar Conta" : "Entrar"}
           </Button>
         </form>
@@ -165,7 +206,7 @@ const Login = () => {
 
         <p className="text-center text-sm text-muted-foreground mt-4">
           {isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"}{" "}
-          <button onClick={() => { setIsSignUp(!isSignUp); setError(""); }} className="text-primary hover:underline font-medium">
+          <button onClick={() => { setIsSignUp(!isSignUp); setError(""); setConfirmPassword(""); }} className="text-primary hover:underline font-medium">
             {isSignUp ? "Entrar" : "Criar conta"}
           </button>
         </p>
