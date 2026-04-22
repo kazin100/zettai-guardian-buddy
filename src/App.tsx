@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import Benefits from "./pages/Benefits";
 import SecurityCenter from "./pages/SecurityCenter";
 import Settings from "./pages/Settings";
+import CadastroUsuario from "./pages/CadastroUsuario";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
 import Privacy from "./pages/Privacy";
@@ -43,6 +44,7 @@ const App = () => (
           {/* Protected routes */}
           <Route path="/scanner" element={<ProtectedRoute><Scanner /></ProtectedRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/cadastro-usuario" element={<ProtectedRoute><CadastroUsuario /></ProtectedRoute>} />
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>

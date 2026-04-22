@@ -19,6 +19,8 @@ export const PLAN_CONFIG: Record<PlanTier, PlanLimits & { label: string; price: 
 export interface Profile {
   id: string;
   email: string | null;
+  full_name?: string | null;
+  phone?: string | null;
   tipo_usuario: string;
   tipo_plano: PlanTier;
   status_pagamento: string;
@@ -94,6 +96,55 @@ export const useProfile = () => {
     setProfile((p) => p ? { ...p, analises_restantes: newCount, ultima_interacao: today } : null);
   };
 
+  const updateProfileDetails = async (values: {
+    full_name: string;
+    email: string;
+    phone?: string;
+    password?: string;
+  }) => {
+    if (!user || !profile) {
+      throw new Error("Usuário não autenticado");
+    }
+
+    const updates: { email?: string; password?: string } = {};
+
+    if (values.email !== user.email) {
+      updates.email = values.email;
+    }
+
+    if (values.password) {
+      updates.password = values.password;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const { error: authError } = await supabase.auth.updateUser(updates);
+      if (authError) throw authError;
+    }
+
+    const normalizedPhone = values.phone?.trim() || null;
+    const profilePayload = {
+      full_name: values.full_name,
+      email: values.email,
+      phone: normalizedPhone,
+    };
+
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update(profilePayload as never)
+      .eq("id", user.id);
+
+    if (profileError) throw profileError;
+
+    setProfile((current) => current ? {
+      ...current,
+      full_name: values.full_name,
+      email: values.email,
+      phone: normalizedPhone,
+    } : current);
+
+    await fetchProfile();
+  };
+
   const subscribeToPlan = async (plan: "basico" | "premium") => {
     if (!user) return;
     const limits = PLAN_CONFIG[plan];
@@ -139,6 +190,7 @@ export const useProfile = () => {
     hasFullDashboard,
     decrementMessages,
     decrementScans,
+    updateProfileDetails,
     subscribeToPlan,
     upgradeToPremium,
     refetch: fetchProfile,
