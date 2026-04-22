@@ -21,7 +21,7 @@ const Navbar = () => {
     { to: "/scanner", label: "Scanner" },
     { to: "/dashboard", label: "Dashboard" },
     { to: "/benefits", label: "Benefícios" },
-    { to: "/security-center", label: "Central" },
+    { to: "/dicas", label: "Dicas" },
     { to: "/assinatura", label: "Planos" },
     { to: "/contact", label: "Contato" },
     { to: "/about", label: "Sobre" },
@@ -66,6 +66,9 @@ const Navbar = () => {
                 <DropdownMenuItem onClick={() => navigate("/settings")} className="cursor-pointer">
                   Configurações
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/historico-compras")} className="cursor-pointer">
+                  Histórico de Compras
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive">
                   <LogOut className="h-4 w-4 mr-2" /> Sair
                 </DropdownMenuItem>
@@ -101,6 +104,9 @@ const Navbar = () => {
           {user ? (
             <>
               <p className="text-xs text-primary truncate py-2">{user.email}</p>
+              <Button variant="cyber-outline" size="sm" className="w-full" onClick={() => { setIsOpen(false); navigate("/historico-compras"); }}>
+                Histórico de Compras
+              </Button>
               <Button variant="cyber-outline" size="sm" className="w-full" onClick={() => { setIsOpen(false); handleLogout(); }}>
                 <LogOut className="h-4 w-4 mr-2" /> Sair
               </Button>
