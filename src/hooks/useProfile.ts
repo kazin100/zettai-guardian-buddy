@@ -29,6 +29,11 @@ export interface Profile {
   ultima_interacao: string | null;
 }
 
+const PLAN_PRICES: Record<Exclude<PlanTier, "gratuito">, number> = {
+  basico: 14.99,
+  premium: 39.99,
+};
+
 export const useProfile = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -150,6 +155,12 @@ export const useProfile = () => {
     const limits = PLAN_CONFIG[plan];
     const tipo_usuario = plan === "premium" ? "premium" : "comum";
     await supabase
+      .from("historico_compras" as never)
+      .update({ status: "inativo" } as never)
+      .eq("usuario_id", user.id)
+      .eq("status", "ativo");
+
+    await supabase
       .from("profiles")
       .update({
         tipo_plano: plan,
@@ -159,6 +170,16 @@ export const useProfile = () => {
         analises_restantes: limits.scansPerDay === Infinity ? 9999 : limits.scansPerDay,
       })
       .eq("id", user.id);
+
+    await supabase
+      .from("historico_compras" as never)
+      .insert({
+        usuario_id: user.id,
+        plano: plan,
+        valor: PLAN_PRICES[plan],
+        status: "ativo",
+      } as never);
+
     setProfile((p) => p ? {
       ...p,
       tipo_plano: plan,
