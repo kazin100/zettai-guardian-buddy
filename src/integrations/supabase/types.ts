@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      historico_compras: {
+        Row: {
+          created_at: string
+          data_compra: string
+          id: string
+          plano: string
+          status: string
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          created_at?: string
+          data_compra?: string
+          id?: string
+          plano: string
+          status?: string
+          usuario_id: string
+          valor: number
+        }
+        Update: {
+          created_at?: string
+          data_compra?: string
+          id?: string
+          plano?: string
+          status?: string
+          usuario_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           analises_restantes: number
