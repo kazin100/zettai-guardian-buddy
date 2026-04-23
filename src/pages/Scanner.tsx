@@ -3,6 +3,7 @@ import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
+import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -22,6 +23,7 @@ const Scanner = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
+  const { user } = useAuth();
   const { profile, isPremium, plan, planLimits, decrementScans } = useProfile();
 
   const canScan = isPremium || (profile?.analises_restantes ?? 0) > 0;
@@ -161,7 +163,7 @@ const Scanner = () => {
           )}
         </div>
       </main>
-      <Footer />
+      {!user && <Footer />}
       <ChatBot />
     </div>
   );
