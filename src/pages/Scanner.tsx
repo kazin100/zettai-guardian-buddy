@@ -3,7 +3,6 @@ import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
-import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -23,7 +22,6 @@ const Scanner = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
-  const { user } = useAuth();
   const { profile, isPremium, plan, planLimits, decrementScans } = useProfile();
 
   const canScan = isPremium || (profile?.analises_restantes ?? 0) > 0;
@@ -59,9 +57,9 @@ const Scanner = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16 flex-1">
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/5 mb-6">
@@ -163,7 +161,7 @@ const Scanner = () => {
           )}
         </div>
       </main>
-      {!user && <Footer />}
+      <Footer />
       <ChatBot />
     </div>
   );

@@ -70,9 +70,9 @@ const Dashboard = () => {
   }, [hasFullDashboard]);
 
   if (loading) return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-24 pb-16 flex items-center justify-center">
+      <main className="pt-24 pb-16 flex-1 flex items-center justify-center">
         <div className="animate-pulse text-muted-foreground">Carregando...</div>
       </main>
       <Footer />
@@ -82,9 +82,9 @@ const Dashboard = () => {
   // Free plan gate
   if (!hasDashboardAccess) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <Navbar />
-        <main className="pt-24 pb-16">
+        <main className="pt-24 pb-16 flex-1">
           <div className="container mx-auto px-4 max-w-lg text-center space-y-6">
             <div className="card-cyber p-10 border-glow space-y-6">
               <Lock className="h-12 w-12 text-primary mx-auto" />
@@ -113,9 +113,9 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="pt-24 pb-16">
+      <main className="pt-24 pb-16 flex-1">
         <div className="container mx-auto px-4">
           <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
             <div>
