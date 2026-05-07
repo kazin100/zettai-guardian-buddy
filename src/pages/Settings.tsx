@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -11,21 +11,57 @@ import { useProfile } from "@/hooks/useProfile";
 
 const Settings = () => {
   const { toast } = useToast();
-  const { profile } = useProfile();
-  const [name] = useState(profile?.full_name ?? "Usuário");
-  const [email] = useState(profile?.email ?? "");
+  const { profile, updateProfileDetails } = useProfile();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("zettai-theme");
+    return stored ? stored === "dark" : true;
+  });
   const [geolocation, setGeolocation] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const handleSave = () => {
-    toast({ title: "Configurações salvas", description: "Suas preferências foram atualizadas." });
+  useEffect(() => {
+    setName(profile?.full_name ?? "");
+    setEmail(profile?.email ?? "");
+  }, [profile]);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (darkMode) {
+      root.classList.remove("light");
+    } else {
+      root.classList.add("light");
+    }
+    localStorage.setItem("zettai-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateProfileDetails({
+        full_name: name,
+        email: email,
+        phone: profile?.phone ?? "",
+      });
+      toast({ title: "Configurações salvas", description: "✅ Suas preferências foram atualizadas." });
+    } catch (error: any) {
+      toast({
+        title: "Erro ao salvar",
+        description: error?.message ?? "Não foi possível salvar suas alterações.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
-      <main className="container mx-auto px-4 pt-24 pb-16 max-w-2xl">
+      <main className="flex-1 container mx-auto px-4 pt-24 pb-16 max-w-2xl w-full">
         <h1 className="text-3xl font-bold text-gradient-cyber mb-8">Configurações</h1>
 
         <div className="space-y-8">
@@ -35,11 +71,11 @@ const Settings = () => {
             <div className="space-y-3">
               <div>
                 <Label htmlFor="name">Nome</Label>
-                <Input id="name" value={name} readOnly className="mt-1 opacity-70" />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
               </div>
               <div>
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} readOnly className="mt-1 opacity-70" />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" />
               </div>
             </div>
             <Link to="/cadastro-usuario">
@@ -66,7 +102,9 @@ const Settings = () => {
             </div>
           </section>
 
-          <Button variant="cyber" className="w-full" onClick={handleSave}>Salvar Configurações</Button>
+          <Button variant="cyber" className="w-full" onClick={handleSave} disabled={saving}>
+            {saving ? "Salvando..." : "Salvar Configurações"}
+          </Button>
         </div>
       </main>
       <Footer />
