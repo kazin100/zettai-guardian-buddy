@@ -22,28 +22,27 @@ const HeroSection = () => {
           <span className="text-sm text-primary font-medium">Segurança para E-commerces</span>
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight">
-          <span className="text-foreground">Proteja seu</span>
-          <br />
-          <span className="text-gradient-cyber glow-text">E-commerce</span>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 leading-[1.1] max-w-4xl mx-auto animate-fade-in">
+          <span className="text-foreground">Proteja seu e-commerce contra </span>
+          <span className="text-gradient-cyber glow-text">ataques, fraudes e vulnerabilidades</span>
+          <span className="text-foreground"> com inteligência artificial.</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-          Plataforma inteligente de segurança com scanner de vulnerabilidades, 
-          chatbot com IA e dashboard analítico para proteger sua loja virtual.
+        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+          Scanner inteligente, chatbot com IA e monitoramento avançado em uma única plataforma.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/scanner">
-            <Button variant="cyber" size="lg" className="text-base gap-2">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+          <Link to="/login">
+            <Button variant="cyber" size="lg" className="text-base gap-2 hover-scale">
               <Shield className="h-5 w-5" />
-              Iniciar Scanner
+              Começar Agora
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
-          <Link to="/dashboard">
-            <Button variant="cyber-outline" size="lg" className="text-base gap-2">
-              Ver Dashboard
-              <ArrowRight className="h-5 w-5" />
+          <Link to="/assinatura">
+            <Button variant="cyber-outline" size="lg" className="text-base gap-2 hover-scale">
+              Ver Planos
             </Button>
           </Link>
         </div>

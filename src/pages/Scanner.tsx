@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock, Crown } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock, Crown, Terminal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -22,6 +22,9 @@ const Scanner = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ScanResult | null>(null);
   const [error, setError] = useState("");
+  const [progress, setProgress] = useState(0);
+  const [logs, setLogs] = useState<string[]>([]);
+  const logsEndRef = useRef<HTMLDivElement>(null);
   const { profile, isPremium, plan, planLimits, decrementScans } = useProfile();
 
   const canScan = isPremium || (profile?.analises_restantes ?? 0) > 0;
@@ -32,6 +35,25 @@ const Scanner = () => {
     setLoading(true);
     setError("");
     setResult(null);
+    setProgress(0);
+    setLogs([]);
+
+    const steps = [
+      "Iniciando análise...",
+      "Verificando HTTPS...",
+      "Analisando headers de segurança...",
+      "Identificando servidor...",
+      "Detectando vulnerabilidades...",
+      "Calculando score final...",
+    ];
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < steps.length) {
+        setLogs((prev) => [...prev, steps[i]]);
+        setProgress((p) => Math.min(p + 15, 90));
+        i++;
+      }
+    }, 450);
 
     if (!isPremium) {
       await decrementScans();
@@ -42,13 +64,22 @@ const Scanner = () => {
         body: { url: url.trim() },
       });
       if (fnError) throw fnError;
+      clearInterval(interval);
+      setProgress(100);
+      setLogs((prev) => [...prev, "✓ Análise concluída com sucesso"]);
       setResult(data);
     } catch (e: any) {
+      clearInterval(interval);
+      setLogs((prev) => [...prev, "✗ Erro durante a análise"]);
       setError(e.message || "Erro ao realizar a análise. Verifique a URL.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [logs]);
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-primary";
@@ -117,6 +148,37 @@ const Scanner = () => {
             <div className="card-cyber p-4 border-destructive/50 mb-6 flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive shrink-0" />
               <p className="text-sm text-destructive">{error}</p>
+            </div>
+          )}
+
+          {(loading || logs.length > 0) && !result && (
+            <div className="card-cyber p-6 mb-6 space-y-4 animate-fade-in">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span className="flex items-center gap-2">
+                  <Terminal className="h-4 w-4 text-primary" />
+                  Console de análise
+                </span>
+                <span className="font-mono text-primary">{progress}%</span>
+              </div>
+              <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-accent transition-all duration-500 ease-out"
+                  style={{ width: `${progress}%`, boxShadow: "0 0 12px hsl(var(--primary) / 0.6)" }}
+                />
+              </div>
+              <div className="bg-background/60 border border-border rounded-lg p-4 font-mono text-xs space-y-1 max-h-48 overflow-y-auto">
+                {logs.map((log, idx) => (
+                  <div key={idx} className="text-primary/90 animate-fade-in">
+                    <span className="text-muted-foreground">$</span> {log}
+                  </div>
+                ))}
+                {loading && (
+                  <div className="text-muted-foreground flex items-center gap-1">
+                    <span className="animate-pulse">▊</span>
+                  </div>
+                )}
+                <div ref={logsEndRef} />
+              </div>
             </div>
           )}
 
