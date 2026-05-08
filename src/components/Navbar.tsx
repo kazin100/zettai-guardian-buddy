@@ -18,13 +18,14 @@ const Navbar = () => {
 
   const links = [
     { to: "/", label: "Home" },
+    { to: "/about", label: "Sobre" },
+    { to: "/servicos", label: "Serviços" },
+    { to: "/assinatura", label: "Planos" },
+    { to: "/depoimentos", label: "Depoimentos" },
+    { to: "/faq", label: "FAQ" },
     { to: "/scanner", label: "Scanner" },
     { to: "/dashboard", label: "Dashboard" },
-    { to: "/benefits", label: "Benefícios" },
-    { to: "/dicas", label: "Dicas" },
-    { to: "/assinatura", label: "Planos" },
     { to: "/contact", label: "Contato" },
-    { to: "/about", label: "Sobre" },
   ];
 
   const handleLogout = async () => {
