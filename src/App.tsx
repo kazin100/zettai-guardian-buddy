@@ -20,6 +20,12 @@ import AboutChatbot from "./pages/AboutChatbot";
 import Assinatura from "./pages/Assinatura";
 import NotFound from "./pages/NotFound";
 import HistoricoCompras from "./pages/HistoricoCompras";
+import Servicos from "./pages/Servicos";
+import Depoimentos from "./pages/Depoimentos";
+import FAQ from "./pages/FAQ";
+import Suporte from "./pages/Suporte";
+import Conta from "./pages/Conta";
+import Relatorios from "./pages/Relatorios";
 
 const App = () => (
   <TooltipProvider>
@@ -39,12 +45,18 @@ const App = () => (
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about-chatbot" element={<AboutChatbot />} />
         <Route path="/assinatura" element={<Assinatura />} />
+        <Route path="/servicos" element={<Servicos />} />
+        <Route path="/depoimentos" element={<Depoimentos />} />
+        <Route path="/faq" element={<FAQ />} />
         {/* Protected routes */}
         <Route path="/scanner" element={<ProtectedRoute><Scanner /></ProtectedRoute>} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/cadastro-usuario" element={<ProtectedRoute><CadastroUsuario /></ProtectedRoute>} />
         <Route path="/historico-compras" element={<ProtectedRoute><HistoricoCompras /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/suporte" element={<ProtectedRoute><Suporte /></ProtectedRoute>} />
+        <Route path="/conta" element={<ProtectedRoute><Conta /></ProtectedRoute>} />
+        <Route path="/relatorios" element={<ProtectedRoute><Relatorios /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
