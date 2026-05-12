@@ -1,4 +1,4 @@
-import { Crown, CheckCircle2, Loader2, Sparkles, Zap } from "lucide-react";
+import { Crown, CheckCircle2, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, type PlanTier } from "@/hooks/useProfile";
