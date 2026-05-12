@@ -69,10 +69,6 @@ const Checkout = () => {
   const [cardExp, setCardExp] = useState("");
   const [cardCvv, setCardCvv] = useState("");
 
-  useEffect(() => {
-    if (!user) navigate("/login");
-  }, [user, navigate]);
-
   const validateCard = () => {
     if (cardName.trim().length < 3) return "Informe o nome impresso no cartão";
     if (cardNumber.replace(/\s/g, "").length < 13) return "Número do cartão inválido";
