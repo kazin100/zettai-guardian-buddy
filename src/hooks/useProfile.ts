@@ -150,7 +150,10 @@ export const useProfile = () => {
     await fetchProfile();
   };
 
-  const subscribeToPlan = async (plan: "basico" | "premium") => {
+  const subscribeToPlan = async (
+    plan: "basico" | "premium",
+    paymentInfo?: { metodo_pagamento?: string; id_transacao?: string }
+  ) => {
     if (!user) return;
     const limits = PLAN_CONFIG[plan];
     const tipo_usuario = plan === "premium" ? "premium" : "comum";
@@ -178,6 +181,9 @@ export const useProfile = () => {
         plano: plan,
         valor: PLAN_PRICES[plan],
         status: "ativo",
+        metodo_pagamento: paymentInfo?.metodo_pagamento ?? null,
+        id_transacao: paymentInfo?.id_transacao ?? null,
+        data_pagamento: new Date().toISOString(),
       } as never);
 
     setProfile((p) => p ? {
