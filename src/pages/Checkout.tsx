@@ -78,6 +78,11 @@ const Checkout = () => {
   };
 
   const handleFinalize = async () => {
+    if (!user) {
+      toast.info("Faça login para concluir sua assinatura");
+      navigate(`/login?redirect=/checkout?plan=${plan}`);
+      return;
+    }
     if (method === "cartao") {
       const err = validateCard();
       if (err) {
