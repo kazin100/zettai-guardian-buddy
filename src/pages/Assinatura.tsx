@@ -1,10 +1,8 @@
-import { useState } from "react";
-import { Crown, CheckCircle2, Loader2, Sparkles, Zap } from "lucide-react";
+import { Crown, CheckCircle2, Sparkles, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { useProfile, type PlanTier } from "@/hooks/useProfile";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -65,10 +63,8 @@ const plans: PlanCard[] = [
 
 const Assinatura = () => {
   const { user } = useAuth();
-  const { plan: currentPlan, subscribeToPlan } = useProfile();
+  const { plan: currentPlan } = useProfile();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [activating, setActivating] = useState<PlanTier | null>(null);
 
   const handleSubscribe = async (planId: PlanTier) => {
     if (!user) {
@@ -76,13 +72,7 @@ const Assinatura = () => {
       return;
     }
     if (planId === "gratuito" || planId === currentPlan) return;
-    setActivating(planId);
-    await subscribeToPlan(planId);
-    toast({
-      title: planId === "premium" ? "🎉 Plano Premium ativado!" : "✅ Plano Básico ativado!",
-      description: "Você agora tem acesso aos recursos do plano.",
-    });
-    setActivating(null);
+    navigate(`/checkout?plan=${planId}`);
   };
 
   return (
@@ -156,14 +146,9 @@ const Assinatura = () => {
                       variant={p.highlight ? "cyber" : "cyber-outline"}
                       className="w-full gap-2"
                       onClick={() => handleSubscribe(p.id)}
-                      disabled={activating !== null}
                     >
-                      {activating === p.id ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Icon className="h-4 w-4" />
-                      )}
-                      {activating === p.id ? "Ativando..." : `Assinar ${p.name}`}
+                      <Icon className="h-4 w-4" />
+                      Assinar {p.name}
                     </Button>
                   )}
                 </div>

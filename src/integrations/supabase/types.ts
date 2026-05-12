@@ -51,7 +51,10 @@ export type Database = {
         Row: {
           created_at: string
           data_compra: string
+          data_pagamento: string | null
           id: string
+          id_transacao: string | null
+          metodo_pagamento: string | null
           plano: string
           status: string
           usuario_id: string
@@ -60,7 +63,10 @@ export type Database = {
         Insert: {
           created_at?: string
           data_compra?: string
+          data_pagamento?: string | null
           id?: string
+          id_transacao?: string | null
+          metodo_pagamento?: string | null
           plano: string
           status?: string
           usuario_id: string
@@ -69,7 +75,10 @@ export type Database = {
         Update: {
           created_at?: string
           data_compra?: string
+          data_pagamento?: string | null
           id?: string
+          id_transacao?: string | null
+          metodo_pagamento?: string | null
           plano?: string
           status?: string
           usuario_id?: string

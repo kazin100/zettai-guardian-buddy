@@ -15,6 +15,8 @@ type Purchase = {
   valor: number;
   data_compra: string;
   status: PurchaseStatus;
+  metodo_pagamento: string | null;
+  id_transacao: string | null;
 };
 
 const statusLabel: Record<PurchaseStatus, string> = {
@@ -44,7 +46,7 @@ const HistoricoCompras = () => {
 
       const { data, error } = await supabase
         .from("historico_compras" as never)
-        .select("id, plano, valor, data_compra, status")
+        .select("id, plano, valor, data_compra, status, metodo_pagamento, id_transacao")
         .eq("usuario_id", user.id)
         .order("data_compra", { ascending: false });
 
@@ -87,7 +89,9 @@ const HistoricoCompras = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Plano adquirido</TableHead>
+                  <TableHead>Método</TableHead>
                   <TableHead>Valor pago</TableHead>
+                  <TableHead>Transação</TableHead>
                   <TableHead>Data da compra</TableHead>
                   <TableHead>Status</TableHead>
                 </TableRow>
@@ -96,12 +100,14 @@ const HistoricoCompras = () => {
                 {purchases.map((purchase) => (
                   <TableRow key={purchase.id}>
                     <TableCell className="font-medium capitalize">{purchase.plano}</TableCell>
+                    <TableCell className="capitalize">{purchase.metodo_pagamento ?? "—"}</TableCell>
                     <TableCell>
                       {purchase.valor.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })}
                     </TableCell>
+                    <TableCell className="font-mono text-xs">{purchase.id_transacao ?? "—"}</TableCell>
                     <TableCell>
                       {new Date(purchase.data_compra).toLocaleDateString("pt-BR")}
                     </TableCell>
