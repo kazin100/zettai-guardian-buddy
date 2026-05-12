@@ -18,6 +18,7 @@ import About from "./pages/About";
 import Privacy from "./pages/Privacy";
 import AboutChatbot from "./pages/AboutChatbot";
 import Assinatura from "./pages/Assinatura";
+import Checkout from "./pages/Checkout";
 import NotFound from "./pages/NotFound";
 import HistoricoCompras from "./pages/HistoricoCompras";
 import Servicos from "./pages/Servicos";
@@ -45,6 +46,7 @@ const App = () => (
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about-chatbot" element={<AboutChatbot />} />
         <Route path="/assinatura" element={<Assinatura />} />
+        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/servicos" element={<Servicos />} />
         <Route path="/depoimentos" element={<Depoimentos />} />
         <Route path="/faq" element={<FAQ />} />
