@@ -46,7 +46,7 @@ const App = () => (
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/about-chatbot" element={<AboutChatbot />} />
         <Route path="/assinatura" element={<Assinatura />} />
-        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route path="/servicos" element={<Servicos />} />
         <Route path="/depoimentos" element={<Depoimentos />} />
         <Route path="/faq" element={<FAQ />} />

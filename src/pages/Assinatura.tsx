@@ -67,10 +67,6 @@ const Assinatura = () => {
   const navigate = useNavigate();
 
   const handleSubscribe = async (planId: PlanTier) => {
-    if (!user) {
-      navigate("/login");
-      return;
-    }
     if (planId === "gratuito" || planId === currentPlan) return;
     navigate(`/checkout?plan=${planId}`);
   };
