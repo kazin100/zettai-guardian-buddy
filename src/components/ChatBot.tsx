@@ -25,6 +25,12 @@ const ChatBot = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    const handler = () => setIsOpen(true);
+    window.addEventListener("open-chatbot", handler);
+    return () => window.removeEventListener("open-chatbot", handler);
+  }, []);
+
   const canSendMessage = isPremium || (profile?.mensagens_restantes ?? 0) > 0;
 
   const sendMessage = async () => {
