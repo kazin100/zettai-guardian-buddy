@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock, Crown, Terminal } from "lucide-react";
+import { ScanSearch, Shield, AlertTriangle, CheckCircle2, XCircle, Loader2, Lock, Crown, Terminal, Activity, Eye, Server, FileBarChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useProfile } from "@/hooks/useProfile";
@@ -38,22 +38,30 @@ const Scanner = () => {
     setProgress(0);
     setLogs([]);
 
-    const steps = [
-      "Iniciando análise...",
-      "Verificando HTTPS...",
-      "Analisando headers de segurança...",
-      "Identificando servidor...",
-      "Detectando vulnerabilidades...",
-      "Calculando score final...",
+    const steps: { msg: string; delay: number; progress: number }[] = [
+      { msg: "[INFO] Inicializando análise...", delay: 400, progress: 6 },
+      { msg: "[INFO] Conectando ao domínio...", delay: 800, progress: 14 },
+      { msg: "[INFO] Resolvendo DNS...", delay: 600, progress: 22 },
+      { msg: "[INFO] Validando certificado SSL...", delay: 900, progress: 32 },
+      { msg: "[INFO] Verificando HTTPS e TLS handshake...", delay: 800, progress: 42 },
+      { msg: "[INFO] Analisando headers de segurança...", delay: 1000, progress: 54 },
+      { msg: "[INFO] Escaneando portas comuns (80, 443, 8080)...", delay: 1100, progress: 66 },
+      { msg: "[INFO] Identificando servidor e versões...", delay: 800, progress: 75 },
+      { msg: "[INFO] Detectando vulnerabilidades conhecidas...", delay: 1200, progress: 85 },
+      { msg: "[INFO] Calculando score de segurança...", delay: 700, progress: 92 },
+      { msg: "[INFO] Gerando relatório final...", delay: 600, progress: 96 },
     ];
     let i = 0;
-    const interval = setInterval(() => {
-      if (i < steps.length) {
-        setLogs((prev) => [...prev, steps[i]]);
-        setProgress((p) => Math.min(p + 15, 90));
-        i++;
-      }
-    }, 450);
+    let timer: any;
+    const runStep = () => {
+      if (i >= steps.length) return;
+      const s = steps[i];
+      setLogs((prev) => [...prev, s.msg]);
+      setProgress(s.progress);
+      i++;
+      timer = setTimeout(runStep, s.delay);
+    };
+    runStep();
 
     if (!isPremium) {
       await decrementScans();
@@ -64,13 +72,28 @@ const Scanner = () => {
         body: { url: url.trim() },
       });
       if (fnError) throw fnError;
-      clearInterval(interval);
+      // Esperar até steps terminarem (mín. ~9s para sensação real)
+      const minWait = new Promise((r) => setTimeout(r, Math.max(0, 9000 - (i * 100))));
+      await minWait;
+      clearTimeout(timer);
       setProgress(100);
-      setLogs((prev) => [...prev, "✓ Análise concluída com sucesso"]);
+      // Logs de resultado dinâmicos
+      const extra: string[] = [];
+      if (data?.https) extra.push("[OK] HTTPS detectado");
+      else extra.push("[CRITICAL] Conexão sem HTTPS");
+      data?.headers?.forEach((h: any) => {
+        if (h.present) extra.push(`[OK] Header ${h.name} presente`);
+        else extra.push(`[WARNING] Header ${h.name} ausente`);
+      });
+      extra.push("[INFO] Análise finalizada com sucesso");
+      for (const l of extra) {
+        await new Promise((r) => setTimeout(r, 120));
+        setLogs((prev) => [...prev, l]);
+      }
       setResult(data);
     } catch (e: any) {
-      clearInterval(interval);
-      setLogs((prev) => [...prev, "✗ Erro durante a análise"]);
+      clearTimeout(timer);
+      setLogs((prev) => [...prev, "[ERROR] Erro durante a análise"]);
       setError(e.message || "Erro ao realizar a análise. Verifique a URL.");
     } finally {
       setLoading(false);
@@ -85,6 +108,19 @@ const Scanner = () => {
     if (score >= 80) return "text-primary";
     if (score >= 50) return "text-yellow-400";
     return "text-destructive";
+  };
+
+  const getRiskStatus = (score: number) => {
+    if (score >= 80) return { label: "🟢 Seguro", color: "text-primary", bg: "bg-primary/10 border-primary/30" };
+    if (score >= 50) return { label: "🟡 Atenção", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/30" };
+    return { label: "🔴 Crítico", color: "text-destructive", bg: "bg-destructive/10 border-destructive/30" };
+  };
+
+  const getLogColor = (log: string) => {
+    if (log.includes("[CRITICAL]") || log.includes("[ERROR]")) return "text-destructive";
+    if (log.includes("[WARNING]")) return "text-yellow-400";
+    if (log.includes("[OK]")) return "text-primary";
+    return "text-primary/80";
   };
 
   return (
@@ -111,6 +147,34 @@ const Scanner = () => {
             )}
           </div>
 
+          {/* Contextualização */}
+          {!loading && !result && (
+            <div className="card-cyber p-6 mb-8 space-y-4 animate-fade-in">
+              <h2 className="font-semibold flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" /> O que será verificado
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                O Scanner Inteligente da Zettai Security realiza verificações automáticas em sites para identificar
+                possíveis vulnerabilidades, falhas de configuração e riscos digitais.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {[
+                  { icon: Lock, label: "Verificação HTTPS" },
+                  { icon: Shield, label: "Análise de headers" },
+                  { icon: CheckCircle2, label: "Validação SSL" },
+                  { icon: Server, label: "Análise de segurança básica" },
+                  { icon: Eye, label: "Detecção preventiva" },
+                  { icon: Activity, label: "Monitoramento de riscos" },
+                ].map((it) => (
+                  <div key={it.label} className="flex items-center gap-2 text-sm p-2 rounded-lg bg-background/40 border border-border/40">
+                    <it.icon className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-muted-foreground">{it.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Limit banner */}
           {!canScan && !isPremium && (
             <div className="card-cyber p-6 border-glow mb-8 text-center space-y-4">
@@ -127,7 +191,7 @@ const Scanner = () => {
           )}
 
           {/* Input */}
-          <div className="card-cyber p-6 border-glow mb-8">
+          <div className={`card-cyber p-6 border-glow mb-8 ${loading ? "animate-pulse" : ""}`}>
             <div className="flex flex-col sm:flex-row gap-3">
               <input
                 value={url}
@@ -166,9 +230,9 @@ const Scanner = () => {
                   style={{ width: `${progress}%`, boxShadow: "0 0 12px hsl(var(--primary) / 0.6)" }}
                 />
               </div>
-              <div className="bg-background/60 border border-border rounded-lg p-4 font-mono text-xs space-y-1 max-h-48 overflow-y-auto">
+              <div className="bg-background/60 border border-border rounded-lg p-4 font-mono text-xs space-y-1 max-h-64 overflow-y-auto">
                 {logs.map((log, idx) => (
-                  <div key={idx} className="text-primary/90 animate-fade-in">
+                  <div key={idx} className={`${getLogColor(log)} animate-fade-in`}>
                     <span className="text-muted-foreground">$</span> {log}
                   </div>
                 ))}
@@ -184,9 +248,12 @@ const Scanner = () => {
 
           {result && (
             <div className="space-y-6">
-              <div className="card-cyber p-8 text-center border-glow">
-                <div className={`text-6xl font-black mb-2 ${getScoreColor(result.score)}`}>{result.score}</div>
+              <div className="card-cyber p-8 text-center border-glow space-y-3 animate-scale-in">
+                <div className={`text-7xl font-black mb-2 ${getScoreColor(result.score)}`}>{result.score}</div>
                 <div className="text-muted-foreground text-sm">Pontuação de Segurança / 100</div>
+                <div className={`inline-block px-4 py-1.5 rounded-full border text-sm font-semibold ${getRiskStatus(result.score).bg} ${getRiskStatus(result.score).color}`}>
+                  {getRiskStatus(result.score).label}
+                </div>
                 <div className="text-xs text-muted-foreground mt-1 font-mono">{result.url}</div>
               </div>
 
@@ -218,6 +285,21 @@ const Scanner = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+
+              {/* Recomendações */}
+              <div className="card-cyber p-6">
+                <h3 className="font-semibold mb-3 text-sm flex items-center gap-2">
+                  <FileBarChart className="h-4 w-4 text-primary" /> Recomendações automáticas
+                </h3>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {!result.https && <li>• Habilitar HTTPS com certificado SSL válido em todo o domínio.</li>}
+                  {result.headers.filter((h) => !h.present).map((h) => (
+                    <li key={h.name}>• Adicionar o header <span className="font-mono text-primary">{h.name}</span> para reforçar a segurança.</li>
+                  ))}
+                  {result.score >= 80 && <li>• Excelente! Mantenha o monitoramento contínuo via dashboard.</li>}
+                  <li>• Realize análises periódicas para detectar novas vulnerabilidades.</li>
+                </ul>
               </div>
             </div>
           )}
